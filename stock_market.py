@@ -14,6 +14,10 @@ def stock_market():
 
         buy_stock = Stock_info(stock_ticker)
         price = buy_stock.return_stock_price()
+        maximum_shares = wallet / price
+
+        print(f'{buy_stock.ticker} Costs ', price)
+        print(f'How many you can buy: {round(maximum_shares - 1)}')
 
         print(f'{buy_stock.ticker} Costs ', price)
         purchase_amount = int(input(f'How many do you want to buy? Your Wallet: {wallet}'))
