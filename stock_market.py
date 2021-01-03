@@ -18,9 +18,13 @@ def stock_market():
     elif option == 3:
         print(f'Here is your Stock history\n{stock_purchase_log}')
         stock_market()
-
     else:
         open_world()
+
+    # saving the data
+    pickle.dump(wallet, open('character_wallet.dat', 'wb'))
+    pickle.dump(stocks_owned, open('stocks_owned.dat', 'wb'))
+    pickle.dump(stock_purchase_log, open('stock_purchase_log.dat', 'wb'))
 
 
 def purchase_stock(wallet, stocks_owned, stock_purchase_log):
@@ -67,11 +71,6 @@ def purchase_stock(wallet, stocks_owned, stock_purchase_log):
         # logging purchase
         stock_purchase_log += f'\n{str(bought_stocks.stocks_bought)}'
 
-        # saving the data
-        pickle.dump(wallet, open('character_wallet.dat', 'wb'))
-        pickle.dump(stocks_owned, open('stocks_owned.dat', 'wb'))
-        pickle.dump(stock_purchase_log, open('stock_purchase_log.dat', 'wb'))
-
         stock_market()
 
 
@@ -98,50 +97,38 @@ def stock_sell(wallet, stocks_owned, stock_purchase_log):
         bought_price = int(stocks_owned[stock_slot][0])
         live_price = current_stock_price.return_stock_price()
 
+        confirm_sell = str(
+            input(f'Are sure you want to sell y/n? Bought Price: ${bought_price}, Live Price: ${live_price}'))
+
+        # checking if the player has the amount of stocks he wants to sell and if he is sure
+        if shares_owned >= sell_amount and confirm_sell == 'y':
+            # adding the money the stocks sold for
+            sold_total = sell_amount * live_price
+            sold_profit = (bought_price - live_price) * sell_amount
+            wallet = sold_total + wallet
+
+            # deducting the sold stocks from the multidimensional array
+            stocks_owned[stock_slot][1] -= sell_amount
+            print(
+                f'Stocks have been sold for a profit of {sold_profit}\nBought Price: ${bought_price}, Sold Price: ${live_price}')
+
+            # removing the stock if it the amount is at zero
+            if stocks_owned[stock_slot][1] == 0:
+                stocks_owned.pop(stock_slot)
+
+            # logging sold stocks
+            stock_purchase_log += f'\n {ticker}, ${bought_price}, ${live_price}' + f' Sold Price: ${sold_total}'
+
+            stock_market()
+
+        else:
+            print(f'Error: You do not own that many shares {shares_owned} / selling canceled')
+            stock_market()
+
     except Exception:
         print('Something was entered incorrectly')
         stock_market()
-
-    confirm_sell = str(
-        input(f'Are sure you want to sell y/n? Bought Price: ${bought_price}, Live Price: ${live_price}'))
-
-    # checking if the player has the amount of stocks he wants to sell and if he is sure
-    if shares_owned >= sell_amount and confirm_sell == 'y':
-        # adding the money the stocks sold for
-        sold_total = sell_amount * live_price
-        sold_profit = (bought_price - live_price) * sell_amount
-        wallet = sold_total + wallet
-
-        # deducting the sold stocks
-        stocks_owned[stock_slot][1] -= sell_amount
-        print(
-            f'Stocks have been sold for a profit of {sold_profit}\nBought Price: ${bought_price}, Sold Price: ${live_price}')
-
-        # removing the stock if it the amount is at zero
-        if stocks_owned[stock_slot][1] == 0:
-            stocks_owned.pop(stock_slot)
-
-        # logging sold stocks
-        stock_purchase_log += f'\n {ticker}, ${bought_price}, ${live_price}' + f' Sold Price: ${sold_total}'
-
-        # saving the data
-        pickle.dump(stocks_owned, open('stocks_owned.dat', 'wb'))
-        pickle.dump(wallet, open('character_wallet.dat', 'wb'))
-        pickle.dump(stock_purchase_log, open('stock_purchase_log.dat', 'wb'))
-
-        stock_market()
-
-    else:
-        print(f'Error: You do not own that many shares {shares_owned} / selling canceled')
-        stock_market()
-
-# gives you money :)
-def add_money():
-    bal = pickle.load(open('character_wallet.dat', 'rb'))
-    bal += 1
-    pickle.dump(bal, open('character_wallet.dat', 'wb'))
-
-
+        
 # run this function first to get the files
 def set_up():
     wallet = 0
