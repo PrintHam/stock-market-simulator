@@ -21,11 +21,6 @@ def stock_market():
     else:
         open_world()
 
-    # saving the data
-    pickle.dump(wallet, open('character_wallet.dat', 'wb'))
-    pickle.dump(stocks_owned, open('stocks_owned.dat', 'wb'))
-    pickle.dump(stock_purchase_log, open('stock_purchase_log.dat', 'wb'))
-
 
 def purchase_stock(wallet, stocks_owned, stock_purchase_log):
     stock_ticker = str(input('Enter a stock ticker'))
@@ -52,7 +47,6 @@ def purchase_stock(wallet, stocks_owned, stock_purchase_log):
         else:
             # looping through the multi-dimensional stock array
             for stock in stocks_owned:
-
                 if stock_ticker in stock:
                     # fetching the index of the existing stock
                     index = stocks_owned.index(stock)
@@ -70,7 +64,12 @@ def purchase_stock(wallet, stocks_owned, stock_purchase_log):
 
         # logging purchase
         stock_purchase_log += f'\n{str(bought_stocks.stocks_bought)}'
-
+        
+        # saving the data
+        pickle.dump(wallet, open('character_wallet.dat', 'wb'))
+        pickle.dump(stocks_owned, open('stocks_owned.dat', 'wb'))
+        pickle.dump(stock_purchase_log, open('stock_purchase_log.dat', 'wb'))
+        
         stock_market()
 
 
@@ -118,9 +117,14 @@ def stock_sell(wallet, stocks_owned, stock_purchase_log):
 
             # logging sold stocks
             stock_purchase_log += f'\n {ticker}, ${bought_price}, ${live_price}' + f' Sold Price: ${sold_total}'
-
+            
+            # saving the data
+            pickle.dump(wallet, open('character_wallet.dat', 'wb'))
+            pickle.dump(stocks_owned, open('stocks_owned.dat', 'wb'))
+            pickle.dump(stock_purchase_log, open('stock_purchase_log.dat', 'wb'))
+            
             stock_market()
-
+            
         else:
             print(f'Error: You do not own that many shares {shares_owned} / selling canceled')
             stock_market()
