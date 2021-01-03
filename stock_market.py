@@ -40,10 +40,15 @@ def purchase_stock(wallet, stocks_owned, stock_purchase_log):
         wallet = wallet - (purchase_amount * price)
         bought_stocks = Append_stock(price, purchase_amount, stock_ticker)
 
-        # if no stock is in stocks_owned then it will just append the bought shares
+         # if no stock is in stocks_owned then it will just append the bought shares
         # otherwise it will loop through stocks_owned
         if not stocks_owned:
             stocks_owned.append(bought_stocks.stocks_bought)
+            
+        # if stock does not exist then append
+        elif stock_ticker not in stocks_owned:
+            stocks_owned.append(bought_stocks.stocks_bought)
+
         else:
             # looping through the multi-dimensional stock array
             for stock in stocks_owned:
@@ -53,7 +58,7 @@ def purchase_stock(wallet, stocks_owned, stock_purchase_log):
 
                     # checking if the matched stock is the same price
                     # helps avoid stocks that are bought for lower getting mixed in with pre-existing shares
-                    if stocks_owned[index][0] != round(price):
+                    if stocks_owned[index][0] != price:
                         stocks_owned.append(bought_stocks.stocks_bought)
                     else:
                         # adding the amount of stocks purchased if the ticker already exists in stocks_owned
