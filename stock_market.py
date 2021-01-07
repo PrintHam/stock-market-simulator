@@ -7,7 +7,8 @@ def stock_market():
     wallet = pickle.load(open('character_wallet.dat', 'rb'))
     stocks_owned = list(pickle.load(open('stocks_owned.dat', 'rb')))
     stock_purchase_log = pickle.load(open('stock_purchase_log.dat', 'rb'))
-    option = int(input('1: Buy Stocks, 2: Sell Stocks, 3: To view purchase history, 4 : To leave'))
+    option = int(
+        input('1: Buy Stocks, 2: Sell Stocks, 3: To view purchase history, 4: Change stock position, 5 : To leave'))
 
     if option == 1:
         purchase_stock(wallet=wallet, stocks_owned=stocks_owned, stock_purchase_log=stock_purchase_log)
@@ -18,14 +19,21 @@ def stock_market():
     elif option == 3:
         print(f'Here is your Stock history\n{stock_purchase_log}')
         stock_market()
+    elif option == 4:
+
+        elements_position = list(map(int, input(
+            f'Swap your Stock positions, type position of the stock you wish to swap with another one\n{stocks_owned}').split()))
+        sort_stocks(stocks_owned=stocks_owned, pos1=elements_position[0], pos2=elements_position[1])
+        print(f'Swap done! {stocks_owned}')
+        stock_market()
     else:
-        open_world()
+        exit()
 
 
 def purchase_stock(wallet, stocks_owned, stock_purchase_log):
     stock_ticker = str(input('Enter a stock ticker'))
     buy_stock = Stock_info(stock_ticker)
-    price = buy_stock.return_stock_price()
+    price = round(buy_stock.return_stock_price())
     maximum_shares = wallet / price
 
     print(f'{buy_stock.ticker} Costs ', price)
@@ -40,13 +48,13 @@ def purchase_stock(wallet, stocks_owned, stock_purchase_log):
         wallet = wallet - (purchase_amount * price)
         bought_stocks = Append_stock(price, purchase_amount, stock_ticker)
 
-         # if no stock is in stocks_owned then it will just append the bought shares
+        # if no stock is in stocks_owned then it will just append the bought shares
         # otherwise it will loop through stocks_owned
         if not stocks_owned:
             stocks_owned.append(bought_stocks.stocks_bought)
-            
+
         # if stock does not exist then append
-        elif stock_ticker not in stocks_owned:
+        elif [stock for stock in stocks_owned if stock_ticker not in stock]:
             stocks_owned.append(bought_stocks.stocks_bought)
 
         else:
@@ -60,21 +68,25 @@ def purchase_stock(wallet, stocks_owned, stock_purchase_log):
                     # helps avoid stocks that are bought for lower getting mixed in with pre-existing shares
                     if stocks_owned[index][0] != price:
                         stocks_owned.append(bought_stocks.stocks_bought)
+                        print('hello world 1')
                     else:
                         # adding the amount of stocks purchased if the ticker already exists in stocks_owned
                         stocks_owned[index][1] += purchase_amount
+                        print('hello world 2')
                     break
+            # clearing the Append class list to prepare the next use
+            bought_stocks.stocks_bought.clear()
 
         print(f'Purchase completed! Your remaining gold: {wallet}', bought_stocks.stocks_bought)
 
         # logging purchase
         stock_purchase_log += f'\n{str(bought_stocks.stocks_bought)}'
-        
+
         # saving the data
         pickle.dump(wallet, open('character_wallet.dat', 'wb'))
         pickle.dump(stocks_owned, open('stocks_owned.dat', 'wb'))
         pickle.dump(stock_purchase_log, open('stock_purchase_log.dat', 'wb'))
-        
+
         stock_market()
 
 
@@ -108,7 +120,7 @@ def stock_sell(wallet, stocks_owned, stock_purchase_log):
         if shares_owned >= sell_amount and confirm_sell == 'y':
             # adding the money the stocks sold for
             sold_total = sell_amount * live_price
-            sold_profit = (bought_price - live_price) * sell_amount
+            sold_profit = (live_price - bought_price) * sell_amount
             wallet = sold_total + wallet
 
             # deducting the sold stocks from the multidimensional array
@@ -122,14 +134,14 @@ def stock_sell(wallet, stocks_owned, stock_purchase_log):
 
             # logging sold stocks
             stock_purchase_log += f'\n {ticker}, ${bought_price}, ${live_price}' + f' Sold Price: ${sold_total}'
-            
+
             # saving the data
             pickle.dump(wallet, open('character_wallet.dat', 'wb'))
             pickle.dump(stocks_owned, open('stocks_owned.dat', 'wb'))
             pickle.dump(stock_purchase_log, open('stock_purchase_log.dat', 'wb'))
-            
+
             stock_market()
-            
+
         else:
             print(f'Error: You do not own that many shares {shares_owned} / selling canceled')
             stock_market()
@@ -137,6 +149,12 @@ def stock_sell(wallet, stocks_owned, stock_purchase_log):
     except Exception:
         print('Something was entered incorrectly')
         stock_market()
+
+
+def sort_stocks(stocks_owned, pos1, pos2):
+    # swapping list element's spot
+    stocks_owned[pos1], stocks_owned[pos2] = stocks_owned[pos2], stocks_owned[pos1]
+    pickle.dump(stocks_owned, open('stocks_owned.dat', 'wb'))
         
 # run this function first to get the files
 def set_up():
